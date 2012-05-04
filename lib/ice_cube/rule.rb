@@ -42,6 +42,8 @@ module IceCube
           params[:count] = value.to_i
         when 'UNTIL'
           params[:until] = DateTime.parse(value).to_time.utc
+        when 'WKST'
+          params[:wkst] = TimeUtil.ical_day_to_symbol(value)
           
         when 'BYSECOND'
           params[:validations][:second_of_minute] = value.split(',').collect{ |v| v.to_i }
@@ -75,8 +77,12 @@ module IceCube
           raise "Invalid or unsupported rrule command : #{name}"
         end
       end
-      
-      rule = IceCube::Rule.send(params[:freq], params[:interval] || 1)
+
+      params[:interval] ||= 1
+      # WKST only valid for weekly rules
+      params.delete(:wkst) unless params[:freq] == 'weekly'
+
+      rule = IceCube::Rule.send(*params.values_at(:freq, :interval, :wkst).compact)
       rule.count(params[:count]) if params[:count]
       rule.until(params[:until]) if params[:until]
       params[:validations].each do |key, value|

@@ -79,6 +79,11 @@ describe IceCube, 'from_ical' do
     rule.should == IceCube::Rule.daily.interval(2)
   end
 
+  it 'should be able to parse week start (WKST)' do
+    rule = IceCube::Rule.from_ical("FREQ=WEEKLY;INTERVAL=2;WKST=MO")
+    rule.should == IceCube::Rule.weekly(2, :monday)
+  end
+
 	it 'test' do
 		schedule = IceCube::Schedule.new(Time.now)
 		schedule.add_recurrence_rule(IceCube::Rule.from_ical("FREQ=DAILY;COUNT=5"))
