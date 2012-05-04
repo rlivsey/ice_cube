@@ -1,4 +1,5 @@
 require File.dirname(__FILE__) + '/../spec_helper'
+require 'active_support/time'
 
 describe IceCube, 'from_ical' do
 
@@ -72,6 +73,11 @@ describe IceCube, 'from_ical' do
 		rule = IceCube::Rule.from_ical("FREQ=WEEKLY;COUNT=5")
 		rule.should == IceCube::Rule.weekly.count(5)
 	end
+
+  it 'should be able to parse a rule with an interval' do
+    rule = IceCube::Rule.from_ical("FREQ=DAILY;INTERVAL=2")
+    rule.should == IceCube::Rule.daily.interval(2)
+  end
 
 	it 'test' do
 		schedule = IceCube::Schedule.new(Time.now)
