@@ -272,7 +272,7 @@ module IceCube
         when 'DURATION'
           data[:duration] # FIXME
         when 'RRULE'
-          data[:rrules] = IceCube::Rule.from_ical(value)
+          data[:rrules] = [IceCube::Rule.from_ical(value)]
         end
       end
       from_hash data
