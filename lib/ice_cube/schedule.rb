@@ -433,7 +433,7 @@ module IceCube
         end
         break nil unless min_time
         next(time = min_time + 1) if exception_time?(min_time)
-        break min_time
+        break Occurrence.new(min_time, min_time + duration)
       end
     end
 
