@@ -3,25 +3,25 @@ require File.dirname(__FILE__) + '/../spec_helper'
 module IceCube
   describe DailyRule, 'occurs_on?' do
 
-  it 'should not produce results for @interval = 0' do
-    start_date = DAY
-    schedule = IceCube::Schedule.new(start_date)
-    schedule.add_recurrence_rule IceCube::Rule.daily(0)
-    #check assumption
-    dates = schedule.occurrences(start_date + 2 * IceCube::ONE_DAY)
-    dates.size.should == 0
-    dates.should == []
-  end
+    it 'should not produce results for @interval = 0' do
+      start_date = DAY
+      schedule = IceCube::Schedule.new(start_date)
+      schedule.add_recurrence_rule IceCube::Rule.daily(0)
+      #check assumption
+      dates = schedule.occurrences(start_date + 2 * IceCube::ONE_DAY)
+      dates.size.should == 0
+      dates.should == []
+    end
 
-  it 'should produce the correct days for @interval = 1' do
-    start_date = DAY
-    schedule = IceCube::Schedule.new(start_date)
-    schedule.add_recurrence_rule IceCube::Rule.daily
-    #check assumption
-    dates = schedule.occurrences(start_date + 2 * IceCube::ONE_DAY)
-    dates.size.should == 3
-    dates.should == [DAY, DAY + 1 * IceCube::ONE_DAY, DAY + 2 * IceCube::ONE_DAY]
-  end
+    it 'should produce the correct days for @interval = 1' do
+      start_date = DAY
+      schedule = IceCube::Schedule.new(start_date)
+      schedule.add_recurrence_rule IceCube::Rule.daily
+      #check assumption
+      dates = schedule.occurrences(start_date + 2 * IceCube::ONE_DAY)
+      dates.size.should == 3
+      dates.should == [DAY, DAY + 1 * IceCube::ONE_DAY, DAY + 2 * IceCube::ONE_DAY]
+    end
 
     it 'should produce the correct days for @interval = 2' do
       schedule = Schedule.new(t0 = Time.now)
