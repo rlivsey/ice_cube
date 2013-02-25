@@ -45,7 +45,7 @@ module IceCube
       case time
       when DateTime
         warn "IceCube: DateTime support is deprecated (please use Time)"
-        time.to_time
+        Time.local(time.year, time.month, time.day, time.hour, time.min, time.sec)
       when Date
         date_eod ? end_of_date(time) : time.to_time
       else
@@ -58,8 +58,7 @@ module IceCube
       case date
       when Date then date
       else
-        return date.to_date if date.respond_to? :to_date
-        return date.to_time.to_date if date.respond_to? :to_time
+        return Date.new(date.year, date.month, date.day)
       end
     end
 
@@ -94,8 +93,9 @@ module IceCube
     end
 
     # Get the beginning of a date
-    def self.beginning_of_date(date, reference=date.to_time)
+    def self.beginning_of_date(date, reference=nil)
       args = [date.year, date.month, date.day, 0, 0, 0]
+      reference ||= Time.local(*args)
       if reference.respond_to?(:time_zone) && reference.time_zone
         reference.time_zone.local(*args)
       else
@@ -104,8 +104,9 @@ module IceCube
     end
 
     # Get the end of a date
-    def self.end_of_date(date, reference=date.to_time)
+    def self.end_of_date(date, reference=nil)
       args = [date.year, date.month, date.day, 23, 59, 59]
+      reference ||= Time.local(*args)
       if reference.respond_to?(:time_zone) && reference.time_zone
         reference.time_zone.local(*args)
       else
@@ -163,7 +164,7 @@ module IceCube
     # Count the number of days to the same day of the next month without
     # overflowing shorter months
     def self.days_to_next_month(time)
-      date = time.to_date
+      date = Date.new(time.year, time.month, time.day)
       (date >> 1) - date
     end
 
@@ -186,13 +187,13 @@ module IceCube
 
     # Number of days to n years
     def self.days_in_n_years(time, year_distance)
-      date = time.to_date
+      date = Date.new(time.year, time.month, time.day)
       ((date >> year_distance * 12) - date).to_i
     end
 
     # The number of days in n months
     def self.days_in_n_months(time, month_distance)
-      date = time.to_date
+      date = Date.new(time.year, time.month, time.day)
       ((date >> month_distance) - date).to_i
     end
 
