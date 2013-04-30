@@ -283,11 +283,14 @@ module IceCube
       data = {}
       ical_string.each_line do |line|
         (property, value) = line.split(':')
+        (property, tzid) = property.split(';') 
         case property
         when 'DTSTART'
-          data[:start_date] #FIXME
+          data[:start_date] = Time.parse(value)
         when 'DTEND'
-          data[:end_time] # FIXME
+          data[:end_time] = Time.parse(value)
+        when 'EXDATE'
+          data[:extimes] = value.split(',').map{|v| Time.parse(v)}
         when 'DURATION'
           data[:duration] # FIXME
         when 'RRULE'
@@ -332,8 +335,12 @@ module IceCube
       schedule = IceCube::Schedule.new TimeUtil.deserialize_time(data[:start_date])
       schedule.duration = data[:duration] if data[:duration]
       schedule.end_time = TimeUtil.deserialize_time(data[:end_time]) if data[:end_time]
-      data[:rrules] && data[:rrules].each { |h| schedule.rrule(IceCube::Rule.from_hash(h)) }
-      data[:exrules] && data[:exrules].each { |h| schedule.exrule(IceCube::Rule.from_hash(h)) }
+      data[:rrules] && data[:rrules].each do |h| 
+        schedule.rrule(h.is_a?(IceCube::Rule) ? h : IceCube::Rule.from_hash(h))
+      end
+      data[:exrules] && data[:exrules].each do |h| 
+        schedule.exrule(h.is_a?(IceCube::Rule) ? h : IceCube::Rule.from_hash(h))
+      end
       data[:rtimes] && data[:rtimes].each do |t|
         schedule.add_recurrence_time TimeUtil.deserialize_time(t)
       end
