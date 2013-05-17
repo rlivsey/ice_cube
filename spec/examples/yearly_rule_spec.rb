@@ -10,6 +10,13 @@ describe IceCube::YearlyRule, 'occurs_on?' do
     schedule.occurrences(start_date + IceCube::TimeUtil.days_in_year(start_date) * IceCube::ONE_DAY).size.should == 0
   end
 
+  it 'should update previous interval' do
+    schedule = stub(start_time: t0 = Time.utc(2013, 5, 1))
+    rule = Rule.yearly(3)
+    rule.interval(1)
+    rule.next_time(t0 + 1, schedule, nil).should == t0 + 365.days
+  end
+
   it 'should be able to specify complex yearly rules' do
     start_date = Time.local(2010, 7, 12, 5, 0, 0)
     schedule = IceCube::Schedule.new(start_date)
