@@ -44,7 +44,7 @@ module IceCube
         when 'UNTIL'
           params[:until] = DateTime.parse(value).to_time.utc
         when 'WKST'
-          params[:wkst] = TimeUtil.ical_day_to_symbol(value)
+          params[:wkst] = TimeUtil.day_to_sym(value)
         when 'BYSECOND'
           params[:validations][:second_of_minute] = value.split(',').collect{ |v| v.to_i }
         when "BYMINUTE"
@@ -55,13 +55,13 @@ module IceCube
           dows = {}
           days = []
           value.split(',').each do |expr|
-              day = TimeUtil.ical_day_to_symbol(expr.strip[-2..-1])
+              day = TimeUtil.day_to_sym(expr.strip[-2..-1])
               if expr.strip.length > 2  # day with occurence
-                occ = expr[0..-3].to_i 
+                occ = expr[0..-3].to_i
                 dows[day].nil? ? dows[day] = [occ] : dows[day].push(occ)
-                days.delete(TimeUtil.symbol_to_day(day))
+                days.delete(TimeUtil.sym_to_wday(day))
               else
-                days.push TimeUtil.symbol_to_day(day) if dows[day].nil?
+                days.push TimeUtil.sym_to_wday(day) if dows[day].nil?
               end
           end
           params[:validations][:day_of_week] = dows unless dows.empty?

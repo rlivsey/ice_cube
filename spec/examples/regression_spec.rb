@@ -229,57 +229,55 @@ module IceCube
       end
     end
 
-    schedule.first.should == Time.zone.local(2011, 12, 29, 14)
-  end
+    it 'should not raise an exception after setting the rule until to nil' do
+      rule = IceCube::Rule.daily.until(Time.local(2012, 10, 1))
+      rule.until(nil)
 
-  it 'should not raise an exception after setting the rule until to nil' do
-    rule = IceCube::Rule.daily.until(Time.local(2012, 10, 1))
-    rule.until(nil)
+      schedule = IceCube::Schedule.new Time.local(2011, 10, 11, 12)
+      schedule.add_recurrence_rule rule
 
-    schedule = IceCube::Schedule.new Time.local(2011, 10, 11, 12)
-    schedule.add_recurrence_rule rule
+      lambda {
+        schedule.occurrences_between(Time.local(2012, 1, 1), Time.local(2012, 12, 1))
+      }.should_not raise_error(ArgumentError, 'comparison of Time with nil failed')
+    end
 
-    lambda {
-      schedule.occurrences_between(Time.local(2012, 1, 1), Time.local(2012, 12, 1))
-    }.should_not raise_error(ArgumentError, 'comparison of Time with nil failed')
-  end
+    it 'should not infinite loop [#109]' do
+      schedule = IceCube::Schedule.new Time.new(2012, 4, 27, 0, 0, 0)
+      schedule.rrule IceCube::Rule.weekly.day(:monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday).hour_of_day(0).minute_of_hour(0).second_of_minute(0)
+      schedule.duration = 3600
+      start_time = Time.new(2012, 10, 20, 0, 0, 0)
+      end_time = Time.new(2012, 10, 20, 23, 59, 59)
+      schedule.occurrences_between(start_time, end_time).first.should == start_time
+    end
 
-  it 'should not infinite loop [#109]' do
-    schedule = IceCube::Schedule.new Time.new(2012, 4, 27, 0, 0, 0)
-    schedule.rrule IceCube::Rule.weekly.day(:monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday).hour_of_day(0).minute_of_hour(0).second_of_minute(0)
-    schedule.duration = 3600
-    start_time = Time.new(2012, 10, 20, 0, 0, 0)
-    end_time = Time.new(2012, 10, 20, 23, 59, 59)
-    schedule.occurrences_between(start_time, end_time).first.should == start_time
-  end
+    it 'should include occurrences on until _date_ [#118]' do
+      schedule = IceCube::Schedule.new Time.new(2012, 4, 27)
+      schedule.rrule IceCube::Rule.daily.hour_of_day(12).until(Date.new(2012, 4, 28))
+      schedule.all_occurrences.should == [Time.new(2012, 4, 27, 12), Time.new(2012, 4, 28, 12)]
+    end
 
-  it 'should include occurrences on until _date_ [#118]' do
-    schedule = IceCube::Schedule.new Time.new(2012, 4, 27)
-    schedule.rrule IceCube::Rule.daily.hour_of_day(12).until(Date.new(2012, 4, 28))
-    schedule.all_occurrences.should == [Time.new(2012, 4, 27, 12), Time.new(2012, 4, 28, 12)]
-  end
+    it 'should return next_occurrence in utc if start_time is utc [#115]' do
+      schedule = IceCube::Schedule.new Time.utc(2012, 10, 10, 20, 15, 0)
+      schedule.rrule IceCube::Rule.daily
+      schedule.next_occurrence.should be_utc
+    end
 
-  it 'should return next_occurrence in utc if start_time is utc [#115]' do
-    schedule = IceCube::Schedule.new Time.utc(2012, 10, 10, 20, 15, 0)
-    schedule.rrule IceCube::Rule.daily
-    schedule.next_occurrence.should be_utc
-  end
+    it 'should return next_occurrence in local if start_time is local [#115]' do
+      schedule = IceCube::Schedule.new Time.new(2012, 10, 10, 20, 15, 0)
+      schedule.rrule IceCube::Rule.daily
+      schedule.next_occurrence.should_not be_utc
+    end
 
-  it 'should return next_occurrence in local if start_time is local [#115]' do
-    schedule = IceCube::Schedule.new Time.new(2012, 10, 10, 20, 15, 0)
-    schedule.rrule IceCube::Rule.daily
-    schedule.next_occurrence.should_not be_utc
-  end
+    it 'should return next_occurrence in local by default [#115]' do
+      schedule = IceCube::Schedule.new
+      schedule.rrule IceCube::Rule.daily
+      schedule.next_occurrence.should_not be_utc
+    end
 
-  it 'should return next_occurrence in local by default [#115]' do
-    schedule = IceCube::Schedule.new
-    schedule.rrule IceCube::Rule.daily
-    schedule.next_occurrence.should_not be_utc
-  end
-
-  it 'should include occurrences on until _date_ [#118]' do
-    schedule = IceCube::Schedule.new Time.new(2012, 4, 27)
-    schedule.rrule IceCube::Rule.daily.hour_of_day(12).until(Date.new(2012, 4, 28))
-    schedule.all_occurrences.should == [Time.new(2012, 4, 27, 12), Time.new(2012, 4, 28, 12)]
+    it 'should include occurrences on until _date_ [#118]' do
+      schedule = IceCube::Schedule.new Time.new(2012, 4, 27)
+      schedule.rrule IceCube::Rule.daily.hour_of_day(12).until(Date.new(2012, 4, 28))
+      schedule.all_occurrences.should == [Time.new(2012, 4, 27, 12), Time.new(2012, 4, 28, 12)]
+    end
   end
 end

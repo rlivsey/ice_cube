@@ -122,6 +122,12 @@ module IceCube
     end
     deprecated_alias :symbol_to_month, :sym_to_month
 
+    def self.day_to_sym(str)
+      day = ICAL_DAYS[str]
+      raise "No such day: #{str}" if day.nil?
+      day
+    end
+
     # Convert a symbol to a wday number
     def self.sym_to_wday(sym)
       return sym if (0..6).include? sym
